@@ -1,0 +1,22 @@
+machine:
+    php:
+        #version: 5.6.18
+
+
+
+test:
+    pre:
+    - make install
+    - make check
+
+    override:
+    - make test
+
+
+
+# notify:
+#     webhooks:
+#         # canax
+#         - url: https://webhooks.gitter.im/e/c8ff44f50de935adf880
+#         # canax/MODULE_NAME
+#         - url: https://webhooks.gitter.im/e/bc3b7bdf43289a6bb91d

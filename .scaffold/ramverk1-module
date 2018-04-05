@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+#
+# Postprocess scaffold
+#
+
+#
+# Read input from user supporting a default value for reponse.
+# arg1: The message to display.
+# arg2: The default value.
+#
+input()
+{
+    read -r -p "$1 [$2]: "
+    echo "${REPLY:-$2}"
+}
+
+
+
+#
+# Compatible sed -i.
+# https://stackoverflow.com/a/4247319/341137
+# arg1: Expression.
+# arg2: Filename.
+#
+sedi()
+{
+    sed -i.bak "$1" "$2"
+    rm -f "$2.bak"
+}
+
+
+
+#
+# Read values from user input
+#
+AUTHOR_NAME=$( input "Author name" "${ANAX_AUTHOR_NAME:-Firstname Lastname}" )
+AUTHOR_EMAIL=$( input "Author email adress" "${ANAX_AUTHOR_EMAIL:-me@somewhere.se}" )
+MODULE_NAME=$( input "Name of module (use low caps)" "module" )
+TODAY=$( date +'%Y-%m-%d' )
+YEAR=$( date +'%Y' )
+
+# Update default config file
+sedi "s/MODULE_NAME/$MODULE_NAME/g" config/module.php
+mv config/module.php "config/$MODULE_NAME.php"
+
+# Update Revision history
+sedi "s/TODAY/$TODAY/g" REVISION.md
+
+# Update Readme
+sedi "s/YEAR/$YEAR/g" README.md
+sedi "s/AUTHOR_NAME/$AUTHOR_NAME/g" README.md
+sedi "s/AUTHOR_EMAIL/$AUTHOR_EMAIL/g" README.md
+sedi "s/MODULE_NAME/$MODULE_NAME/g" README.md
+
+# Update License
+sedi "s/YEAR/$YEAR/g" LICENSE.txt
+sedi "s/AUTHOR_NAME/$AUTHOR_NAME/g" LICENSE.txt
+sedi "s/AUTHOR_EMAIL/$AUTHOR_EMAIL/g" LICENSE.txt
+
+# Update composer.json
+sedi "s/MODULE_NAME/$MODULE_NAME/g" composer.json
+sedi "s/AUTHOR_NAME/$AUTHOR_NAME/g" composer.json
+sedi "s/AUTHOR_EMAIL/$AUTHOR_EMAIL/g" composer.json
+
+# Create src
+install -d src
+
+# Get some default files from anax/common.
+composer require anax/common
+rsync -a vendor/anax/common/Makefile .
+rsync -a vendor/anax/common/{.gitignore,.php*.xml} .
+rsync -a vendor/anax/common/{.*.yml,*.yml} .
+rsync -a vendor/anax/common/extra/{.*.yml,*.yml} .
+rsync -a vendor/anax/common/extra/test .
+composer remove anax/common
+rm -rf vendor/
+
+
+# Final message
+printf "\
+You need to manually update the following files and services.
+ GitHub:      Create https://github.com/canax/%s
+ Gitter:      Enable https://gitter.im/canax/%s
+ Composer:    Edit composer.json
+ Packagist:   Enable https://packagist.org/packages/anax/%s
+ Travis:      Enable https://travis-ci.org/, edit .travis.yml
+ CircleCI:    Enable https://circleci.com/, edit circle.yml
+ Scrutinizer: Enable https://scrutinizer-ci.com/
+ SensioLabs:  Enable https://insight.sensiolabs.com/
+ and git add, commit, push to origin and then tag - ready to go. 
+" "$MODULE_NAME" "$MODULE_NAME" "$MODULE_NAME" 
