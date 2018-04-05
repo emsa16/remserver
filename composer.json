@@ -1,5 +1,5 @@
 {
-    "name": "anax/remserver",
+    "name": "emsa/remserver",
     "type": "library",
     "description": "Anax remserver module.",
     "keywords": ["boilerplate", "framework", "mvc", "micro", "education"],

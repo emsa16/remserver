@@ -9,7 +9,7 @@ return [
         "rem" => [
             "shared" => true,
             "callback" => function () {
-                $rem = new \Anax\RemServer\RemServer();
+                $rem = new \Emsa\RemServer\RemServer();
                 $rem->configure("remserver.php");
                 $rem->injectSession($this->get("session"));
                 return $rem;
@@ -18,7 +18,7 @@ return [
         "remController" => [
             "shared" => false,
             "callback" => function () {
-                $rem = new \Anax\RemServer\RemServerController();
+                $rem = new \Emsa\RemServer\RemServerController();
                 $rem->setDI($this);
                 return $rem;
             }
